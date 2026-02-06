@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API from '../config/api.js';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -16,7 +17,7 @@ function Login() {
 
     try {
       const response = await axios.post(
-        'http://localhost:3000/api/users/login',
+        API.LOGIN,
         { email, password },
         {
           headers: {
@@ -25,7 +26,7 @@ function Login() {
           },
         }
       );
-      console.log("login Api Called")
+      console.log("Login API Called");
       console.log('Login response:', response.data);
 
 
@@ -79,7 +80,7 @@ function Login() {
             <label>Password</label>
             <input
               type="password"
-              autoComplete="current-password" // ✅ FIX WARNING
+              autoComplete="current-password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

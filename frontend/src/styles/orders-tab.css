@@ -1,0 +1,122 @@
+.orders-tab {
+  padding: 1.5rem;
+}
+
+.tab-title {
+  color: #2c5282;
+  margin-bottom: 1.5rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+/* Message */
+.message {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.message.success {
+  background-color: #e6fffa;
+  color: #0c8599;
+  border-left: 4px solid #0c8599;
+}
+
+.message.error {
+  background-color: #ffebee;
+  color: #c92a2a;
+  border-left: 4px solid #c92a2a;
+}
+
+/* Table */
+.table-container {
+  overflow-x: auto;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.orders-table th,
+.orders-table td {
+  padding: 1rem 1.25rem;
+  text-align: center;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.orders-table th {
+  background: #2c5282;
+  color: white;
+  font-weight: 600;
+}
+
+.orders-table tr:hover {
+  background: #f7fafc;
+}
+
+/* Status Badge */
+.status-badge {
+  font-weight: 600;
+  padding: 0.35rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  text-transform: capitalize;
+}
+
+.status-badge.created { background: #fef3c7; color: #92400e; }
+.status-badge.confirmed { background: #dbeafe; color: #1e40af; }
+.status-badge.shipped { background: #c3dafe; color: #1e3a8a; }
+.status-badge.delivered { background: #d1fae5; color: #065f46; }
+.status-badge.cancelled { background: #fee2e2; color: #991b1b; }
+
+/* Status Select */
+.actions-cell {
+  white-space: nowrap;
+}
+
+.status-select {
+  padding: 0.6rem 1rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  background: white;
+  font-size: 0.95rem;
+  min-width: 150px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status-select:focus {
+  outline: none;
+  border-color: #3182ce;
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+}
+
+.status-select:hover {
+  border-color: #a0aec0;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #718096;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .orders-table th,
+  .orders-table td {
+    padding: 0.9rem 0.8rem;
+  }
+
+  .status-select {
+    min-width: 130px;
+  }
+}

@@ -35,14 +35,8 @@ function proxyTo(target) {
   });
 }
 
-// PUBLIC routes (no auth)- USER_SERVICE/api/login
-router.use("/api/login", proxyTo(config.services.user));
-
 /**
- * PROTECTED routes (token required)
- * Maps:
- *   /api/products -> PRODUCT_SERVICE/api/products
- *   /api/orders   -> ORDER_SERVICE/api/orders
+ * Middleware to require Bearer token in Authorization header
  */
 function requireAuthHeader(req, res, next) {
   const auth = req.headers.authorization || "";
@@ -55,7 +49,33 @@ function requireAuthHeader(req, res, next) {
   next();
 }
 
+/**
+ * PUBLIC routes (no auth)
+ * Maps USER_SERVICE /api/* endpoints
+ */
+// Login endpoint - support both /api/login and /api/users/login
+router.post("/api/login", proxyTo(config.services.user));
+router.post("/api/users/login", proxyTo(config.services.user));
+
+/**
+ * PROTECTED routes (token required)
+ * Maps:
+ *   /api/users/*     -> USER_SERVICE /api/*     (profile, validate-token, etc.)
+ *   /api/products/** -> PRODUCT_SERVICE /api/**  (products list, inventory update, etc.)
+ *   /api/orders/**   -> ORDER_SERVICE /api/**    (create, list, update status, etc.)
+ *   /api/notifications/** -> NOTIFICATION_SERVICE /api/** 
+ */
+
+// User service routes (protected) - profile, validate-token, etc.
+router.use("/api/users", requireAuthHeader, proxyTo(config.services.user));
+
+// Product service routes (protected)
 router.use("/api/products", requireAuthHeader, proxyTo(config.services.product));
+
+// Order service routes (protected)
 router.use("/api/orders", requireAuthHeader, proxyTo(config.services.order));
+
+// Notification service routes (protected)
+router.use("/api/notifications", requireAuthHeader, proxyTo(config.services.notification));
 
 export default router;
