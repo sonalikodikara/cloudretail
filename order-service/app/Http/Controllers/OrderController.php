@@ -16,34 +16,54 @@ class OrderController extends Controller
             'quantity'   => 'required|integer|min:1',
         ]);
 
-        // Step 2: Call Product Service to reduce stock
-        $response = Http::withToken($request->bearerToken())
-            ->post('http://api-gateway:3000/api/products/inventory/update', [
-                'product_id' => $request->product_id,
-                'quantity'   => $request->quantity,
-            ]);
-
-        // Step 3: If Product Service fails → STOP transaction
-        if ($response->failed()) {
-            return response()->json([
-                'message' => 'Order failed. Insufficient stock or product service error.'
-            ], 400);
+        // Step 2: Verify token exists
+        $token = $request->bearerToken();
+        if (!$token) {
+            return response()->json(['error' => 'Authorization required'], 401);
         }
-            
 
-        // stock update succeeds
+        // Step 3: Call Product Service to reduce stock
+        try {
+            $response = Http::timeout(5)->withToken($token)
+                ->post('http://localhost:8002/api/inventory/update', [
+                    'product_id' => $request->product_id,
+                    'quantity'   => $request->quantity,
+                ]);
+
+            // Step 4: If Product Service fails → STOP transaction
+            if ($response->failed()) {
+                return response()->json([
+                    'message' => 'Order failed. Insufficient stock or product service error.'
+                ], 400);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Product service call failed: ' . $e->getMessage());
+            return response()->json(['error' => 'Product service unavailable'], 503);
+        }
+
+        // Step 5: Create order with user_id from authenticated user
+        $user = $request->get('user');
+        if (!$user || !isset($user['id'])) {
+            return response()->json(['error' => 'User information not available'], 401);
+        }
+
         $order = Order::create([
+            'user_id'    => $user['id'],
             'product_id' => $request->product_id,
             'quantity'   => $request->quantity,
             'status'     => 'PLACED',
         ]);
 
-        // Notify Notification Service        
-        Http::post('http://notification-service:8004/api/notify', [
-            'order_id' => $order->id,
-            'status'   => $order->status,
-        ]);
-        
+        // Notify Notification Service asynchronously, but don't fail if it's unavailable
+        try {
+            Http::timeout(5)->post('http://notification-service:8004/api/notify', [
+                'order_id' => $order->id,
+                'status'   => $order->status,
+            ]);
+        } catch (\Exception $e) {
+            // Log but don't fail the order creation
+            \Log::warning('Notification service call failed: ' . $e->getMessage());
+        }
 
         return response()->json($order, 201);
     }
@@ -65,7 +85,7 @@ class OrderController extends Controller
     // Customer/Admin: View order
     public function show($id)
     {
-        $order = Order::with('product')->findOrFail($id);
+        $order = Order::findOrFail($id);
         return response()->json($order);
     }
 }

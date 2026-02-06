@@ -31,6 +31,9 @@ class ProductController extends Controller
 
         // Get user info from middleware
         $user = $request->user;
+        if (!$user) {
+            return response()->json(['error' => 'User information unavailable'], 401);
+        }
 
         // Optional: check admin role
         if (($user['role'] ?? 'USER') !== 'ADMIN') {
@@ -54,6 +57,9 @@ class ProductController extends Controller
         ]);
 
         $user = $request->user;
+        if (!$user) {
+            return response()->json(['error' => 'User information unavailable'], 401);
+        }
 
         if (($user['role'] ?? 'USER') !== 'ADMIN') {
             return response()->json(['error' => 'Unauthorized: Admin only'], 403);

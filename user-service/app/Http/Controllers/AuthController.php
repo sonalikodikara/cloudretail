@@ -36,11 +36,15 @@ class AuthController extends Controller
     public function profile(Request $request)
     {
         $user = $request->user();
-        return [
+        if (!$user) {
+            return response()->json(['error' => 'User not authenticated'], 401);
+        }
+
+        return response()->json([
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
             'role' => strtoupper($user->role),
-        ];
+        ]);
     }
 }
