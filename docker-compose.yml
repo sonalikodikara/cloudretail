@@ -35,6 +35,8 @@ services:
       - "8002:8000"
     env_file:
       - ./product-service/.env
+    environment:
+      DB_HOST: db
     depends_on:
       - db
     networks:
@@ -46,6 +48,10 @@ services:
       - "8003:8000"
     env_file:
       - ./order-service/.env
+    environment:
+      DB_HOST: db
+      PRODUCT_SERVICE_URL: http://product-service:8000
+      NOTIFICATION_SERVICE_URL: http://notification-service:8000
     depends_on:
       - db
       - product-service
@@ -56,6 +62,8 @@ services:
     build: ./notification-service
     ports:
       - "8004:8000"
+    environment:
+      DB_HOST: db
     env_file:
       - ./notification-service/.env
     depends_on:
@@ -66,7 +74,11 @@ services:
   api-gateway:
     build: ./api-gateway
     ports:
-      - "3000:3000"
+      - "9000:9000"
+    environment:
+      USER_SERVICE: http://user-service:8000
+      PRODUCT_SERVICE: http://product-service:8000
+      ORDER_SERVICE: http://order-service:8000
     depends_on:
       - user-service
       - product-service
