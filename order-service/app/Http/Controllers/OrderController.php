@@ -8,6 +8,22 @@ use Illuminate\Support\Facades\Http;
 
 class OrderController extends Controller
 {
+    // List orders (admin sees all, customers see own orders)
+    public function index(Request $request)
+    {
+        $user = $request->get('user');
+        if (!$user || !isset($user['id'])) {
+            return response()->json(['error' => 'User information not available'], 401);
+        }
+
+        $query = Order::query();
+        if (($user['role'] ?? 'USER') !== 'ADMIN') {
+            $query->where('user_id', $user['id']);
+        }
+
+        return response()->json($query->orderByDesc('id')->get());
+    }
+
     public function store(Request $request)
     {
         // Step 1: Validate incoming request
@@ -52,7 +68,7 @@ class OrderController extends Controller
             'user_id'    => $user['id'],
             'product_id' => $request->product_id,
             'quantity'   => $request->quantity,
-            'status'     => 'PLACED',
+            'status'     => 'CREATED',
         ]);
 
         // Notify Notification Service asynchronously, but don't fail if it's unavailable

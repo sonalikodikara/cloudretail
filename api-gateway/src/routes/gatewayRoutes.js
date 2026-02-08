@@ -5,20 +5,18 @@ import { config } from "../config.js";
 const router = Router();
 
 // helper to create proxy with good defaults
-function proxyTo(target) {
+function proxyTo(target, options = {}) {
   return createProxyMiddleware({
     target,
     changeOrigin: true,
     xfwd: true, 
     proxyTimeout: 30_000, // timeout for proxy is 30 seconds
     timeout: 30_000,
+    pathRewrite: options.pathRewrite,
 
     onProxyReq(proxyReq, req) {
       // Forward request-id to downstream services
       if (req.requestId) proxyReq.setHeader("X-Request-Id", req.requestId);
-
-      // Enforce JSON upstream, keep Content-Type unchanged
-      // proxyReq.setHeader("Content-Type", req.headers["content-type"] || "application/json");
     },
 
     onProxyRes(proxyRes, req, res) {
@@ -67,15 +65,40 @@ router.post("/api/users/login", proxyTo(config.services.user));
  */
 
 // User service routes (protected) - profile, validate-token, etc.
-router.use("/api/users", requireAuthHeader, proxyTo(config.services.user));
+// Rewrite /api/users/* -> /api/* to match user-service routes.
+router.use(
+  "/api/users",
+  requireAuthHeader,
+  proxyTo(config.services.user, {
+    pathRewrite: path => `/api${path}`,
+  })
+);
 
 // Product service routes (protected)
-router.use("/api/products", requireAuthHeader, proxyTo(config.services.product));
+router.use(
+  "/api/products",
+  requireAuthHeader,
+  proxyTo(config.services.product, {
+    pathRewrite: path => `/api/products${path}`,
+  })
+);
 
 // Order service routes (protected)
-router.use("/api/orders", requireAuthHeader, proxyTo(config.services.order));
+router.use(
+  "/api/orders",
+  requireAuthHeader,
+  proxyTo(config.services.order, {
+    pathRewrite: path => `/api/orders${path}`,
+  })
+);
 
 // Notification service routes (protected)
-router.use("/api/notifications", requireAuthHeader, proxyTo(config.services.notification));
+router.use(
+  "/api/notifications",
+  requireAuthHeader,
+  proxyTo(config.services.notification, {
+    pathRewrite: path => `/api${path}`,
+  })
+);
 
 export default router;

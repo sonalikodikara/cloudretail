@@ -18,9 +18,8 @@ const corsOrigins = (process.env.CORS_ORIGINS || "")
   .map(s => s.trim())
   .filter(Boolean);
 
-// Middleware - Security & Parsing
+// Middleware - Security
 app.use(helmet());
-app.use(express.json({ limit: "5mb" }));
 
 // CORS Configuration - allows frontend to connect to gateway
 app.use(

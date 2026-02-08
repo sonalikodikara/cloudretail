@@ -20,9 +20,15 @@ export default function OrdersTab() {
       const res = await axios.get(API.ORDERS.LIST, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setOrders(res.data);
+
+      // Add localStatus for controlled dropdown
+      const ordersWithLocalStatus = res.data.map(o => ({
+        ...o,
+        localStatus: o.status,
+      }));
+
+      setOrders(ordersWithLocalStatus);
     } catch (err) {
-      console.error("Failed to fetch orders", err);
       setMessage("Failed to load orders");
       setMessageType("error");
     }
@@ -35,29 +41,37 @@ export default function OrdersTab() {
       });
       setProducts(res.data);
     } catch (err) {
-      console.error("Failed to fetch products", err);
+      console.error(err);
     }
   };
 
-  const updateStatus = async (id, status) => {
+  const handleStatusChange = (id, newStatus) => {
+    setOrders(prev =>
+      prev.map(o =>
+        o.id === id ? { ...o, localStatus: newStatus } : o
+      )
+    );
+  };
+
+  const saveStatus = async (id, status) => {
     try {
       await axios.put(
         API.ORDERS.UPDATE_STATUS(id),
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       setMessage("Order status updated successfully");
       setMessageType("success");
       fetchOrders();
     } catch (err) {
       setMessage("Failed to update order status");
       setMessageType("error");
-      console.error(err);
     }
   };
 
   const getProductName = (productId) => {
-    const product = products.find((p) => p.id === productId);
+    const product = products.find(p => p.id === productId);
     return product ? product.name : productId;
   };
 
@@ -79,7 +93,7 @@ export default function OrdersTab() {
               <th>Product</th>
               <th>Qty</th>
               <th>Status</th>
-              <th>Update Status</th>
+              <th>Update</th>
             </tr>
           </thead>
           <tbody>
@@ -90,19 +104,25 @@ export default function OrdersTab() {
                 </td>
               </tr>
             ) : (
-              orders.map((o) => (
+              orders.map(o => (
                 <tr key={o.id}>
                   <td>{o.id}</td>
                   <td>{getProductName(o.product_id)}</td>
                   <td>{o.quantity}</td>
-                  <td className={`status-badge status-${o.status.toLowerCase()}`}>
-                    {o.status}
+
+                  <td>
+                    <span className={`status-badge status-${o.status.toLowerCase()}`}>
+                      {o.status}
+                    </span>
                   </td>
+
                   <td className="actions-cell">
                     <select
-                      value={o.status}
-                      onChange={(e) => updateStatus(o.id, e.target.value)}
-                      className="status-select"
+                      value={o.localStatus}
+                      onChange={(e) =>
+                        handleStatusChange(o.id, e.target.value)
+                      }
+                      className={`status-select status-${o.localStatus.toLowerCase()}`}
                     >
                       <option value="CREATED">CREATED</option>
                       <option value="CONFIRMED">CONFIRMED</option>
@@ -110,6 +130,14 @@ export default function OrdersTab() {
                       <option value="DELIVERED">DELIVERED</option>
                       <option value="CANCELLED">CANCELLED</option>
                     </select>
+
+                    <button
+                      className="save-btn"
+                      onClick={() => saveStatus(o.id, o.localStatus)}
+                      disabled={o.localStatus === o.status}
+                    >
+                      Save
+                    </button>
                   </td>
                 </tr>
               ))

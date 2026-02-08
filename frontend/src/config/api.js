@@ -38,34 +38,34 @@ export const API = {
   BASE_URL: API_BASE_URL,
 
   // Auth Endpoints
-  LOGIN: `${API_BASE_URL}/users/login`,
-  LOGIN_ALT: `${API_BASE_URL}/users/login`, // Alternative login endpoint
+  LOGIN: `${API_BASE_URL}/api/login`,
+  LOGIN_ALT: `${API_BASE_URL}/api/users/login`, // Alternative login endpoint
 
   // User Endpoints
   USERS: {
-    PROFILE: `${API_BASE_URL}/users/profile`,
-    VALIDATE_TOKEN: `${API_BASE_URL}/users/validate-token`,
+    PROFILE: `${API_BASE_URL}/api/users/profile`,
+    VALIDATE_TOKEN: `${API_BASE_URL}/api/users/validate-token`,
   },
 
   // Product Endpoints
   PRODUCTS: {
-    LIST: `${API_BASE_URL}/products/products`,
-    CREATE: `${API_BASE_URL}/products`,
-    UPDATE: (id) => `${API_BASE_URL}/products/${id}`,
-    INVENTORY_UPDATE: `${API_BASE_URL}/products/inventory/update`,
+    LIST: `${API_BASE_URL}/api/products`,
+    CREATE: `${API_BASE_URL}/api/products`,
+    UPDATE: (id) => `${API_BASE_URL}/api/products/${id}`,
+    INVENTORY_UPDATE: `${API_BASE_URL}/api/products/inventory/update`,
   },
 
   // Order Endpoints
   ORDERS: {
-    LIST: `${API_BASE_URL}/orders`,
-    CREATE: `${API_BASE_URL}/orders`,
-    GET: (id) => `${API_BASE_URL}/orders/orders/${id}`,
-    UPDATE_STATUS: (id) => `${API_BASE_URL}/orders/orders/${id}/status`,
+    LIST: `${API_BASE_URL}/api/orders`,
+    CREATE: `${API_BASE_URL}/api/orders`,
+    GET: (id) => `${API_BASE_URL}/api/orders/${id}`,
+    UPDATE_STATUS: (id) => `${API_BASE_URL}/api/orders/${id}/status`,
   },
 
   // Notification Endpoints
   NOTIFICATIONS: {
-    SEND: `${API_BASE_URL}/api/notifications`,
+    SEND: `${API_BASE_URL}/api/notifications/notify`,
   },
 };
 

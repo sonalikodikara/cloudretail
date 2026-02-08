@@ -94,6 +94,26 @@ class ProductController extends Controller
             'message' => 'Stock updated',
             'product' => $product
         ]);
+    } 
+
+    /**
+     * Delete a product (Admin)
+     */
+    public function destroy(Request $request, $id)
+    {
+        $user = $request->user;
+        if (!$user) {
+            return response()->json(['error' => 'User information unavailable'], 401);
+        }
+
+        if (($user['role'] ?? 'USER') !== 'ADMIN') {
+            return response()->json(['error' => 'Unauthorized: Admin only'], 403);
+        }
+
+        $product = Product::findOrFail($id);
+        $product->delete();
+
+        return response()->json(['message' => 'Product deleted']);
     }
 
     /**

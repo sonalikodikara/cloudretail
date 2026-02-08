@@ -9,8 +9,10 @@ function CustomerDashboard() {
   const [orders, setOrders] = useState([]);
   const [productId, setProductId] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [cartItems, setCartItems] = useState([]);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState(''); // 'success' | 'error'
+  const [isPlacing, setIsPlacing] = useState(false);
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
@@ -68,8 +70,42 @@ function CustomerDashboard() {
     }
   };
 
-  const handleCreateOrder = async (e) => {
-    e.preventDefault();
+  const handleCreateOrder = async () => {
+    setMessage('');
+    setMessageType('');
+
+    if (cartItems.length === 0) {
+      setMessage('Add at least one item before placing orders');
+      setMessageType('error');
+      return;
+    }
+
+    setIsPlacing(true);
+
+    try {
+      for (const item of cartItems) {
+        await axios.post(
+          API.ORDERS.CREATE,
+          { product_id: item.productId, quantity: item.quantity },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+
+      setMessage('Orders placed successfully!');
+      setMessageType('success');
+      setCartItems([]);
+      fetchProducts();
+      fetchOrders(); // Refresh orders list
+    } catch (err) {
+      console.error(err);
+      setMessage(err.response?.data?.message || 'Failed to create order');
+      setMessageType('error');
+    } finally {
+      setIsPlacing(false);
+    }
+  };
+
+  const handleAddItem = () => {
     setMessage('');
     setMessageType('');
 
@@ -79,29 +115,59 @@ function CustomerDashboard() {
       return;
     }
 
-    if (quantity < 1) {
-      setMessage('Quantity must be at least 1');
+    const qty = Number(quantity);
+    if (!Number.isInteger(qty) || qty < 1) {
+      setMessage('Quantity must be a whole number greater than 0');
       setMessageType('error');
       return;
     }
 
-    try {
-      await axios.post(
-        API.ORDERS.CREATE,
-        { product_id: productId, quantity: Number(quantity) },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setMessage('Order placed successfully!');
-      setMessageType('success');
-      setProductId('');
-      setQuantity(1);
-      fetchOrders(); // Refresh orders list
-    } catch (err) {
-      console.error(err);
-      setMessage(err.response?.data?.message || 'Failed to create order');
+    const product = products.find((p) => p.id === Number(productId));
+    if (!product) {
+      setMessage('Selected product not found');
       setMessageType('error');
+      return;
     }
+
+    if (qty > product.stock) {
+      setMessage('Quantity exceeds available stock');
+      setMessageType('error');
+      return;
+    }
+
+    const existing = cartItems.find((item) => item.productId === Number(productId));
+    if (existing) {
+      const nextQty = existing.quantity + qty;
+      if (nextQty > product.stock) {
+        setMessage('Total quantity exceeds available stock');
+        setMessageType('error');
+        return;
+      }
+
+      setCartItems((prev) =>
+        prev.map((item) =>
+          item.productId === Number(productId)
+            ? { ...item, quantity: nextQty }
+            : item
+        )
+      );
+    } else {
+      setCartItems((prev) => [
+        ...prev,
+        {
+          productId: Number(productId),
+          name: product.name,
+          quantity: qty,
+        },
+      ]);
+    }
+
+    setProductId('');
+    setQuantity(1);
+  };
+
+  const handleRemoveItem = (id) => {
+    setCartItems((prev) => prev.filter((item) => item.productId !== id));
   };
 
   const handleLogout = () => {
@@ -109,7 +175,7 @@ function CustomerDashboard() {
     navigate('/');
   };
 
-  const selectedProduct = products.find(p => p.id === productId);
+  const selectedProduct = products.find(p => p.id === Number(productId));
 
   return (
     <div className="customer-dashboard">
@@ -164,7 +230,7 @@ function CustomerDashboard() {
               </div>
             )}
 
-            <form onSubmit={handleCreateOrder} className="order-form">
+            <form className="order-form" onSubmit={(e) => e.preventDefault()}>
               <div className="form-group">
                 <label htmlFor="product">Select Product</label>
                 <select
@@ -195,10 +261,53 @@ function CustomerDashboard() {
                 />
               </div>
 
-              <button type="submit" className="btn btn-primary" disabled={!productId}>
-                Place Order
-              </button>
+              <div className="order-actions">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleAddItem}
+                  disabled={!productId}
+                >
+                  Add Item
+                </button>
+              </div>
             </form>
+
+            <div className="cart-items">
+              <h3>Items to Order</h3>
+              {cartItems.length === 0 ? (
+                <div className="empty-state">No items added yet</div>
+              ) : (
+                <ul className="cart-list">
+                  {cartItems.map((item) => (
+                    <li key={item.productId} className="cart-item">
+                      <div className="cart-item-info">
+                        <span className="cart-item-name">{item.name}</span>
+                        <span className="cart-item-qty">Qty: {item.quantity}</span>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-tertiary"
+                        onClick={() => handleRemoveItem(item.productId)}
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="cart-actions">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleCreateOrder}
+                  disabled={cartItems.length === 0 || isPlacing}
+                >
+                  {isPlacing ? 'Placing Orders...' : 'Place Orders'}
+                </button>
+              </div>
+            </div>
           </section>
 
           {/* Right - My Orders */}

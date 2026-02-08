@@ -21,10 +21,12 @@ return new class extends Migration
 
             $table->enum('status', [
                 'PLACED',
+                'CREATED',
                 'CONFIRMED',
                 'SHIPPED',
+                'DELIVERED',
                 'CANCELLED'
-            ])->default('PLACED');
+            ])->default('CREATED');
 
             $table->timestamps();
         });
