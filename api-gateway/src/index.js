@@ -122,8 +122,7 @@ app.listen(PORT, () => {
   console.log(`    GET    /api/orders             → Order Service`);
   console.log(`    POST   /api/orders             → Order Service`);
   console.log(`    PUT    /api/orders/{id}/status → Order Service`);
-  console.log(`    GET    /api/notifications     → Notification Service`);
-  console.log(`    POST   /api/notifications     → Notification Service`);
+  console.log(`    POST   /api/notifications/notify → Notification Service`);
   
   if (corsOrigins.length > 0) {
     console.log(`\n🔐 CORS Origins allowed:`, corsOrigins.join(", "));

@@ -83,6 +83,16 @@ router.use(
   })
 );
 
+// Inventory update endpoint (protected)
+// Product service expects POST /api/inventory/update (not under /api/products).
+router.post(
+  "/api/inventory/update",
+  requireAuthHeader,
+  proxyTo(config.services.product, {
+    pathRewrite: () => "/api/inventory/update",
+  })
+);
+
 // Order service routes (protected)
 router.use(
   "/api/orders",

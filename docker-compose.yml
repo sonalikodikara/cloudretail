@@ -15,6 +15,7 @@ services:
       - cloudretail
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
 
   user-service:
     build: ./user-service
@@ -37,6 +38,7 @@ services:
       - ./product-service/.env
     environment:
       DB_HOST: db
+      USER_SERVICE_URL: http://user-service:8000
     depends_on:
       - db
     networks:
@@ -79,6 +81,7 @@ services:
       USER_SERVICE: http://user-service:8000
       PRODUCT_SERVICE: http://product-service:8000
       ORDER_SERVICE: http://order-service:8000
+      NOTIFICATION_SERVICE: http://notification-service:8000
     depends_on:
       - user-service
       - product-service
