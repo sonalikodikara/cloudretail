@@ -52,6 +52,7 @@ services:
       - ./order-service/.env
     environment:
       DB_HOST: db
+      USER_SERVICE_URL: http://user-service:8000
       PRODUCT_SERVICE_URL: http://product-service:8000
       NOTIFICATION_SERVICE_URL: http://notification-service:8000
     depends_on:

@@ -40,8 +40,8 @@ class OrderController extends Controller
 
         // Step 3: Call Product Service to reduce stock
         try {
-            $productServiceUrl = env('PRODUCT_SERVICE_URL', 'http://localhost:8002');
-            $response = Http::timeout(5)->withToken($token)
+            $productServiceUrl = getenv('PRODUCT_SERVICE_URL') ?: env('PRODUCT_SERVICE_URL', 'http://localhost:8002');
+            $response = Http::timeout(5)->acceptJson()->withToken($token)
                 ->post($productServiceUrl . '/api/inventory/update', [
                     'product_id' => $request->product_id,
                     'quantity'   => $request->quantity,
@@ -73,8 +73,8 @@ class OrderController extends Controller
 
         // Notify Notification Service asynchronously, but don't fail if it's unavailable
         try {
-            $notificationServiceUrl = env('NOTIFICATION_SERVICE_URL', 'http://localhost:8004');
-            Http::timeout(5)->post($notificationServiceUrl . '/api/notify', [
+            $notificationServiceUrl = getenv('NOTIFICATION_SERVICE_URL') ?: env('NOTIFICATION_SERVICE_URL', 'http://localhost:8004');
+            Http::timeout(5)->acceptJson()->post($notificationServiceUrl . '/api/notify', [
                 'order_id' => $order->id,
                 'status'   => $order->status,
             ]);

@@ -18,8 +18,8 @@ class VerifyUserToken
         }
 
         try {
-            $userService = env('USER_SERVICE_URL', 'http://localhost:8001');
-            $response = Http::timeout(5)->withToken($token)
+            $userService = getenv('USER_SERVICE_URL') ?: env('USER_SERVICE_URL', 'http://localhost:8001');
+            $response = Http::timeout(5)->acceptJson()->withToken($token)
                 ->get($userService . '/api/validate-token');
 
             if ($response->failed()) {
@@ -29,6 +29,7 @@ class VerifyUserToken
             // Merge user into request
             $request->merge(['user' => $response->json('user')]);
         } catch (\Exception $e) {
+            \Log::error('User service validation call failed: ' . $e->getMessage());
             return response()->json(['error' => 'User service unreachable'], 503);
         }
 

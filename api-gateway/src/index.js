@@ -108,8 +108,8 @@ app.use((err, req, res, next) => {
 
 // Start Server
 app.listen(PORT, () => {
-  console.log(`\n🚀 API Gateway running on http://localhost:${PORT}`);
-  console.log(`\n📋 Available Routes:`);
+  console.log(`\n API Gateway running on http://localhost:${PORT}`);
+  console.log(`\n Available Routes:`);
   console.log(`  Public (no auth):`);
   console.log(`    POST   /api/login`);
   console.log(`    POST   /api/users/login`);
@@ -125,9 +125,9 @@ app.listen(PORT, () => {
   console.log(`    POST   /api/notifications/notify → Notification Service`);
   
   if (corsOrigins.length > 0) {
-    console.log(`\n🔐 CORS Origins allowed:`, corsOrigins.join(", "));
+    console.log(`\n CORS Origins allowed:`, corsOrigins.join(", "));
   } else {
-    console.log(`\n🔓 CORS: All origins allowed (development mode)`);
+    console.log(`\n CORS: All origins allowed (development mode)`);
   }
   console.log();
 });

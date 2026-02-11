@@ -39,7 +39,7 @@ export const API = {
 
   // Auth Endpoints
   LOGIN: `${API_BASE_URL}/api/login`,
-  LOGIN_ALT: `${API_BASE_URL}/api/users/login`, // Alternative login endpoint
+  LOGIN_ALT: `${API_BASE_URL}/api/users/login`, 
 
   // User Endpoints
   USERS: {
@@ -52,7 +52,7 @@ export const API = {
     LIST: `${API_BASE_URL}/api/products`,
     CREATE: `${API_BASE_URL}/api/products`,
     UPDATE: (id) => `${API_BASE_URL}/api/products/${id}`,
-    INVENTORY_UPDATE: `${API_BASE_URL}/api/products/inventory/update`,
+    INVENTORY_UPDATE: `${API_BASE_URL}/api/inventory/update`,
   },
 
   // Order Endpoints
